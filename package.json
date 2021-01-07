@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node-dev index.js --clear"
   },
   "keywords": [],
   "author": "",
@@ -14,5 +14,8 @@
     "express": "^4.17.1",
     "helmet": "^4.3.1",
     "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "node-dev": "^6.2.0"
   }
 }
