@@ -1,10 +1,18 @@
 const express = require("express");
 const router = express.Router();
 
-router.get("/", (req, res) => {
-  console.log("hello from places");
+const {
+  getPlaceById,
+  getPlacesByUserId,
+  createPlace,
+  updatePlaceById,
+  deletePlaceById,
+} = require("../controllers/places-controllers");
 
-  res.send({ msg: "bonjour pnipen" });
-});
+router.get("/:pid", getPlaceById);
+router.get("/user/:uid", getPlacesByUserId);
+router.post("/", createPlace);
+router.patch("/:pid", updatePlaceById);
+router.delete("/:pid", deletePlaceById);
 
 module.exports = router;
