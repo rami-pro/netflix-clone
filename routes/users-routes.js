@@ -7,12 +7,14 @@ const {
   deleteUser,
   findAllUsers,
 } = require("../controllers/users-controllers");
+const fileUpload = require("../middlewares/image-upload");
 
 const router = express.Router();
 
 router.get("/", findAllUsers);
 router.post(
   "/signup",
+  fileUpload.single("image"),
   [
     check("name").not().isEmpty(),
     check("email").normalizeEmail().isEmail(),
