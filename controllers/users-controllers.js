@@ -1,4 +1,5 @@
 const { nanoid } = require("nanoid");
+const bcrypt = require("bcryptjs");
 const { validationResult } = require("express-validator");
 
 const HttpError = require("../models/http-error");
@@ -18,17 +19,27 @@ const signupUser = async (req, res, next) => {
     return next(new HttpError("internal server error", 500));
   }
 
+  let hashedPassword;
+  try {
+    hashedPassword = await bcrypt.hash(req.body.password, 12);
+  } catch (error) {
+    next(new HttpError("can't create a user try again", 500));
+  }
+
   let user = new User({
     ...req.body,
-    image: "https://via.placeholder.com/150/771796",
+    password: hashedPassword,
+    image: `${req.file.path.replace("\\", "/")}`,
   });
   try {
     await user.save();
   } catch (error) {
     return next(new HttpError("internal server error", 500));
   }
-
-  res.status(201).send(user.toObject({ getters: true }));
+  const token = user.generateAuthToken();
+  user = { ...user.toObject({ getters: true }) };
+  delete user.password;
+  res.status(201).send({ user, token });
 };
 
 const loginUser = async (req, res, next) => {
@@ -40,8 +51,10 @@ const loginUser = async (req, res, next) => {
   } catch (error) {
     return next(new HttpError("internal server error", 500));
   }
-
-  res.send(user);
+  const token = user.generateAuthToken();
+  user = { ...user.toObject({ getters: true }) };
+  delete user.password;
+  res.send({ user, token });
 };
 
 const deleteUser = (req, res, next) => {
@@ -71,6 +84,8 @@ const findAllUsers = async (req, res, next) => {
   let users;
   try {
     users = await User.find({}, "-password");
+    if (!users || users.length < 1)
+      return next(new HttpError("no users in database", 404));
   } catch (error) {
     return next(new HttpError("internal server error", 500));
   }

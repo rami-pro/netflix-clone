@@ -1,3 +1,4 @@
+const fs = require("fs");
 const { nanoid } = require("nanoid");
 const mongoose = require("mongoose");
 const { validationResult } = require("express-validator");
@@ -11,13 +12,13 @@ const getPlaceById = async (req, res, next) => {
   let place;
   try {
     place = await Place.findOne({ _id: req.params.pid });
+    if (!place) {
+      return next(new HttpError("no place found", 404));
+    }
   } catch (error) {
     return next(new HttpError("query error", 500));
   }
 
-  if (!place) {
-    return next(new HttpError("no place found", 404));
-  }
   res.send(place.toObject({ getters: true }));
 };
 
@@ -45,15 +46,6 @@ const createPlace = async (req, res, next) => {
     return next(new HttpError("Invalid inputs data", 422));
   }
 
-  let existingUser;
-  try {
-    existingUser = await User.findOne({ _id: req.body.creator });
-    if (!existingUser)
-      return next(new HttpError("no user corresponding found.", 404));
-  } catch (error) {
-    return next(new HttpError("internal server error", 500));
-  }
-
   let coordinates;
   try {
     coordinates = await geocode(req.body.address);
@@ -62,19 +54,20 @@ const createPlace = async (req, res, next) => {
   }
   const createdPlace = new Place({
     ...req.body,
-    image: "https://via.placeholder.com/150/771796",
+    image: `${req.file.path.replace("\\", "/")}`,
     location: coordinates,
-    creator: existingUser._id,
+    creator: req.user._id,
   });
 
   try {
     const sess = await mongoose.startSession();
     sess.startTransaction();
     await createdPlace.save({ session: sess });
-    existingUser.places.push(createdPlace);
-    await existingUser.save({ session: sess });
+    req.user.places.push(createdPlace);
+    await req.user.save({ session: sess });
     await sess.commitTransaction();
   } catch (error) {
+    console.log(error);
     return next(new HttpError("creating a place failed", 500));
   }
   res.status(201).send(createdPlace);
@@ -96,6 +89,11 @@ const updatePlaceById = async (req, res, next) => {
   if (!place) {
     return next(new HttpError("no place found", 404));
   }
+
+  if (place.creator.toString() !== req.user._id.toString()) {
+    return next(new HttpError("Unauthorized action, please authenticate", 401));
+  }
+
   for (key in req.body) {
     place[key] = req.body[key];
   }
@@ -119,14 +117,22 @@ const deletePlaceById = async (req, res, next) => {
   if (!place) {
     return next(new HttpError("no place found", 404));
   }
+  console.log(place.creator._id.toString() !== req.user._id.toString());
+  console.log(place.creator.toString());
+  console.log(req.user._id.toString());
+  if (place.creator._id.toString() !== req.user._id.toString()) {
+    return next(new HttpError("Unauthorized action, please authenticate", 401));
+  }
 
   try {
     const sess = await mongoose.startSession();
     sess.startTransaction();
     await place.remove({ session: sess });
     place.creator.places.pull(place);
+
     await place.creator.save({ session: sess });
     await sess.commitTransaction();
+    fs.unlink(place.image, (er) => console.log(er));
   } catch (error) {
     console.log(error);
     return next(new HttpError("deleting a place failed", 500));
