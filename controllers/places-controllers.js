@@ -67,9 +67,9 @@ const createPlace = async (req, res, next) => {
     console.log(error);
     return next(new HttpError("creating a place failed", 500));
   }
-  let place = { ...createdPlace };
-  delete place.pic;
-  res.status(201).send(place);
+  // let place = { ...createdPlace };
+  // delete place.pic;
+  res.status(201).send(createdPlace);
 };
 
 const getPlaceImage = async (req, res) => {
