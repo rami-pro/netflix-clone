@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node-dev -r dotenv/config index.js --clear"
+    "start": "node index.js",
+    "test": "node-dev -r dotenv/config index.js --clear"
   },
   "keywords": [],
   "author": "",
