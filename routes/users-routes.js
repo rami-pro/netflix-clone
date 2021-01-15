@@ -6,12 +6,15 @@ const {
   updateUser,
   deleteUser,
   findAllUsers,
+  getAvatar,
 } = require("../controllers/users-controllers");
 const fileUpload = require("../middlewares/image-upload");
 
 const router = express.Router();
 
 router.get("/", findAllUsers);
+router.get("/:id/avatar", getAvatar);
+
 router.post(
   "/signup",
   fileUpload.single("image"),

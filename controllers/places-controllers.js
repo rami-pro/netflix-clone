@@ -60,6 +60,10 @@ const createPlace = async (req, res, next) => {
   });
 
   try {
+    createdPlace.pic = user.avatar = await sharp(req.file.buffer)
+      .jpeg()
+      .toBuffer();
+    createdPlace.image = `/${createdPlace._id}/image`;
     const sess = await mongoose.startSession();
     sess.startTransaction();
     await createdPlace.save({ session: sess });
@@ -73,6 +77,21 @@ const createPlace = async (req, res, next) => {
   res.status(201).send(createdPlace);
 };
 
+const getPlaceImage = async (req, res) => {
+  try {
+    const { pic } = await Place.findOne(
+      { _id: req.params.id },
+      { pic: 1, _id: 0 }
+    );
+
+    res.set("Content-Type", "image/jpeg");
+    if (!pic) throw Error({ error: "not found" });
+
+    res.send(pic);
+  } catch (error) {
+    res.status(400).send();
+  }
+};
 const updatePlaceById = async (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -147,4 +166,5 @@ module.exports = {
   createPlace,
   updatePlaceById,
   deletePlaceById,
+  getPlaceImage,
 };

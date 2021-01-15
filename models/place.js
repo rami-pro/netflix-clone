@@ -6,6 +6,7 @@ const placeSchema = new Schema({
   address: { type: String, required: true },
   description: { type: String, required: true },
   image: { type: String, required: true },
+  pic: { type: Buffer },
   location: {
     lat: { type: Number, required: true },
     lng: { type: Number, required: true },

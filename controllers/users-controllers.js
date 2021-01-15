@@ -29,9 +29,13 @@ const signupUser = async (req, res, next) => {
   let user = new User({
     ...req.body,
     password: hashedPassword,
-    image: `${req.file.path.replace("\\", "/")}`,
   });
   try {
+    user.avatar = await sharp(req.file.buffer)
+      .resize(250, 250)
+      .jpeg()
+      .toBuffer();
+    user.image = `/${user._id}/avatar`;
     await user.save();
   } catch (error) {
     return next(new HttpError("internal server error", 500));
@@ -55,6 +59,22 @@ const loginUser = async (req, res, next) => {
   user = { ...user.toObject({ getters: true }) };
   delete user.password;
   res.send({ user, token });
+};
+
+const getAvatar = async (req, res) => {
+  try {
+    const { avatar } = await User.findOne(
+      { _id: req.params.id },
+      { avatar: 1, _id: 0 }
+    );
+
+    res.set("Content-Type", "image/jpeg");
+    if (!avatar) throw Error({ error: "not found" });
+
+    res.send(avatar);
+  } catch (error) {
+    res.status(400).send();
+  }
 };
 
 const deleteUser = (req, res, next) => {
@@ -99,4 +119,5 @@ module.exports = {
   deleteUser,
   updateUser,
   findAllUsers,
+  getAvatar,
 };

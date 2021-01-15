@@ -11,9 +11,11 @@ const {
   createPlace,
   updatePlaceById,
   deletePlaceById,
+  getPlaceImage,
 } = require("../controllers/places-controllers");
 
 router.get("/:pid", getPlaceById);
+router.get("/:pid/image", getPlaceImage);
 router.get("/user/:uid", getPlacesByUserId);
 
 router.use(auth);
