@@ -106,7 +106,7 @@ const updateUser = (req, res, next) => {
 const findAllUsers = async (req, res, next) => {
   let users;
   try {
-    users = await User.find({}, "-password", "-avatar");
+    users = await User.find({}, { avatar: 0, password: 0 });
     if (!users || users.length < 1)
       return next(new HttpError("no users in database", 404));
   } catch (error) {
