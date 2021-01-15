@@ -2,6 +2,7 @@ const fs = require("fs");
 const { nanoid } = require("nanoid");
 const mongoose = require("mongoose");
 const { validationResult } = require("express-validator");
+const sharp = require("sharp");
 
 const HttpError = require("../models/http-error");
 const Place = require("../models/place");

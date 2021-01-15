@@ -1,5 +1,6 @@
 const { nanoid } = require("nanoid");
 const bcrypt = require("bcryptjs");
+const sharp = require("sharp");
 const { validationResult } = require("express-validator");
 
 const HttpError = require("../models/http-error");
