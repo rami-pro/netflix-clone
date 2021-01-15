@@ -67,9 +67,9 @@ const createPlace = async (req, res, next) => {
     console.log(error);
     return next(new HttpError("creating a place failed", 500));
   }
-  // let place = { ...createdPlace };
-  // delete place.pic;
-  res.status(201).send(createdPlace);
+  let place = { ...createdPlace.toObject({ getters: true }) };
+  delete place.pic;
+  res.status(201).send(place);
 };
 
 const getPlaceImage = async (req, res) => {
@@ -116,9 +116,9 @@ const updatePlaceById = async (req, res, next) => {
   } catch (error) {
     return next(new HttpError("updating a place failed", 500));
   }
-  place = { ...place };
+  place = { ...place.toObject({ getters: true }) };
   delete place.pic;
-  res.send(place.toObject({ getters: true }));
+  res.send(place);
 };
 
 const deletePlaceById = async (req, res, next) => {
