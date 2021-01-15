@@ -12,7 +12,7 @@ const geocode = require("../util/location");
 const getPlaceById = async (req, res, next) => {
   let place;
   try {
-    place = await Place.findOne({ _id: req.params.pid });
+    place = await Place.findOne({ _id: req.params.pid }, "-pic");
     if (!place) {
       return next(new HttpError("no place found", 404));
     }
@@ -25,20 +25,15 @@ const getPlaceById = async (req, res, next) => {
 
 const getPlacesByUserId = async (req, res, next) => {
   //let place;
-  let userWithPlaces;
+  let places;
   try {
-    userWithPlaces = await User.findById(req.params.uid).populate("places");
-    if (!userWithPlaces) return next(new HttpError("no place found", 404));
+    places = await Place.find({ creator: req.params.uid }, "-pic");
+    if (!places.length) return next(new HttpError("no place found", 404));
   } catch (error) {
     return next(new HttpError("internal error can't find a place", 500));
   }
 
-  if (!userWithPlaces.places.length) {
-    return next(new HttpError("no place found", 404));
-  }
-  res.send(
-    userWithPlaces.places.map((place) => place.toObject({ getters: true }))
-  );
+  res.send(places.map((place) => place.toObject({ getters: true })));
 };
 
 const createPlace = async (req, res, next) => {
@@ -61,9 +56,7 @@ const createPlace = async (req, res, next) => {
   });
 
   try {
-    createdPlace.pic = user.avatar = await sharp(req.file.buffer)
-      .jpeg()
-      .toBuffer();
+    createdPlace.pic = await sharp(req.file.buffer).jpeg().toBuffer();
     createdPlace.image = `/${createdPlace._id}/image`;
     const sess = await mongoose.startSession();
     sess.startTransaction();
@@ -75,7 +68,9 @@ const createPlace = async (req, res, next) => {
     console.log(error);
     return next(new HttpError("creating a place failed", 500));
   }
-  res.status(201).send(createdPlace);
+  let place = { ...createdPlace };
+  delete place.pic;
+  res.status(201).send(place);
 };
 
 const getPlaceImage = async (req, res) => {
@@ -122,6 +117,8 @@ const updatePlaceById = async (req, res, next) => {
   } catch (error) {
     return next(new HttpError("updating a place failed", 500));
   }
+  place = { ...place };
+  delete place.pic;
   res.send(place.toObject({ getters: true }));
 };
 

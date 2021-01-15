@@ -44,6 +44,7 @@ const signupUser = async (req, res, next) => {
   const token = user.generateAuthToken();
   user = { ...user.toObject({ getters: true }) };
   delete user.password;
+  delete user.avatar;
   res.status(201).send({ user, token });
 };
 
@@ -59,6 +60,7 @@ const loginUser = async (req, res, next) => {
   const token = user.generateAuthToken();
   user = { ...user.toObject({ getters: true }) };
   delete user.password;
+  delete user.avatar;
   res.send({ user, token });
 };
 
@@ -104,7 +106,7 @@ const updateUser = (req, res, next) => {
 const findAllUsers = async (req, res, next) => {
   let users;
   try {
-    users = await User.find({}, "-password");
+    users = await User.find({}, "-password", "-avatar");
     if (!users || users.length < 1)
       return next(new HttpError("no users in database", 404));
   } catch (error) {
