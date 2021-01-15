@@ -1,17 +1,13 @@
 const axios = require("axios");
 const HttpError = require("../models/http-error");
 
-const mapboxApi = (key, address) =>
+const mapboxApi = (address) =>
   `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
     address
-  )}.json?access_token=${key}&&limit=1`;
-const API_KEY =
-  "pk.eyJ1IjoicmFtaWdiMDEiLCJhIjoiY2tqbmtzYW9pMTh1bDJ6czJhOHN4Zmt5aCJ9.HffnPY_281p-lRDN0IF5vQ";
-const KEY =
-  "pk.eyJ1IjoicmFtaWdiMDEiLCJhIjoiY2s0dHk2MzEzMDF3MzNtbnR6d2NoOGhmMCJ9._eDEHUqeGaulfOBOT70Lrg";
+  )}.json?access_token=${process.env.MAPBOX_KEY}&&limit=1`;
 
 const geocode = async (address) => {
-  const url = mapboxApi(API_KEY, address);
+  const url = mapboxApi(address);
 
   try {
     const { data } = await axios.get(url);
