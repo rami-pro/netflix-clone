@@ -50,7 +50,6 @@ const createPlace = async (req, res, next) => {
   }
   const createdPlace = new Place({
     ...req.body,
-    image: `${req.file.path.replace("\\", "/")}`,
     location: coordinates,
     creator: req.user._id,
   });
@@ -58,12 +57,12 @@ const createPlace = async (req, res, next) => {
   try {
     createdPlace.pic = await sharp(req.file.buffer).jpeg().toBuffer();
     createdPlace.image = `/${createdPlace._id}/image`;
-    const sess = await mongoose.startSession();
-    sess.startTransaction();
-    await createdPlace.save({ session: sess });
+    // const sess = await mongoose.startSession();
+    // sess.startTransaction();
+    await createdPlace.save();
     req.user.places.push(createdPlace);
-    await req.user.save({ session: sess });
-    await sess.commitTransaction();
+    await req.user.save();
+    //await sess.commitTransaction();
   } catch (error) {
     console.log(error);
     return next(new HttpError("creating a place failed", 500));
