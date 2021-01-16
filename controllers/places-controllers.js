@@ -75,7 +75,7 @@ const createPlace = async (req, res, next) => {
 const getPlaceImage = async (req, res) => {
   try {
     const { pic } = await Place.findOne(
-      { _id: req.params.id },
+      { _id: req.params.pid },
       { pic: 1, _id: 0 }
     );
 
