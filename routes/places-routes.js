@@ -6,12 +6,12 @@ const auth = require("../middlewares/auth");
 const router = express.Router();
 
 const {
-  getPlaceById,
-  getPlacesByUserId,
-  createPlace,
-  updatePlaceById,
-  deletePlaceById,
-  getPlaceImage,
+    getPlaceById,
+    getPlacesByUserId,
+    createPlace,
+    updatePlaceById,
+    deletePlaceById,
+    getPlaceImage
 } = require("../controllers/places-controllers");
 
 router.get("/:pid", getPlaceById);
@@ -20,19 +20,19 @@ router.get("/user/:uid", getPlacesByUserId);
 
 router.use(auth);
 router.post(
-  "/",
-  fileUpload.single("image"),
-  [
-    check("title").not().isEmpty(),
-    check("description").isLength({ min: 5 }),
-    check("address").not().isEmpty(),
-  ],
-  createPlace
+    "/",
+    fileUpload.single("image"),
+    [
+        check("title").not().isEmpty(),
+        check("description").isLength({ min: 5 }),
+        check("address").not().isEmpty()
+    ],
+    createPlace
 );
 router.patch(
-  "/:pid",
-  [check("title").not().isEmpty(), check("description").isLength({ min: 5 })],
-  updatePlaceById
+    "/:pid",
+    [check("title").not().isEmpty(), check("description").isLength({ min: 5 })],
+    updatePlaceById
 );
 router.delete("/:pid", deletePlaceById);
 
