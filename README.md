@@ -16,7 +16,7 @@ GET /api/places/user/:uid
 DELETE /api/places/:pid
 ```
 
-I used MVC (just a design pattern) to build my REST-API.
+I used MVC (just a design pattern) to build my REST-API
 
 # try project
 
